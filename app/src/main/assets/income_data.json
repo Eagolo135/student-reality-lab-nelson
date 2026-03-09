@@ -1,0 +1,14 @@
+[
+  {"year": 1990, "median_income": 29943.0, "cpi_index": 130.7, "real_income": null},
+  {"year": 1995, "median_income": 34076.0, "cpi_index": 152.4, "real_income": null},
+  {"year": 2000, "median_income": 41990.0, "cpi_index": 172.2, "real_income": null},
+  {"year": 2005, "median_income": 46058.0, "cpi_index": 195.3, "real_income": null},
+  {"year": 2010, "median_income": 49276.0, "cpi_index": 218.1, "real_income": null},
+  {"year": 2012, "median_income": 51017.0, "cpi_index": 229.6, "real_income": null},
+  {"year": 2014, "median_income": 53657.0, "cpi_index": 236.7, "real_income": null},
+  {"year": 2016, "median_income": 57617.0, "cpi_index": 240.0, "real_income": null},
+  {"year": 2018, "median_income": 63179.0, "cpi_index": 251.1, "real_income": null},
+  {"year": 2020, "median_income": 67521.0, "cpi_index": 258.8, "real_income": null},
+  {"year": 2022, "median_income": 74580.0, "cpi_index": 292.7, "real_income": null},
+  {"year": 2024, "median_income": 78171.0, "cpi_index": 312.0, "real_income": null}
+]
