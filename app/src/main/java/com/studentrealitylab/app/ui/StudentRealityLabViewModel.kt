@@ -24,11 +24,11 @@ class StudentRealityLabViewModel(application: Application) : AndroidViewModel(ap
 
     init {
         val records = repository.loadIncomeRecords()
-        if (records.isEmpty()) return
-
-        val initialYear = records.first().year
-        _uiState.value = StudentRealityLabUiState(records = records)
-        onYearSelected(initialYear)
+        if (records.isNotEmpty()) {
+            val initialYear = records.first().year
+            _uiState.value = StudentRealityLabUiState(records = records)
+            onYearSelected(initialYear)
+        }
     }
 
     /**
