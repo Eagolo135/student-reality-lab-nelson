@@ -1,100 +1,83 @@
 package com.studentrealitylab.app.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.studentrealitylab.app.chart.IncomeLineChart
-import com.studentrealitylab.app.utils.InflationCalculator
-import kotlin.math.roundToInt
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun StudentRealityLabScreen(
     viewModel: StudentRealityLabViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val destinations = remember {
+        listOf(AppDestination.Story, AppDestination.Insights, AppDestination.About)
+    }
+    val (selectedDestination, setSelectedDestination) = rememberSaveable {
+        mutableStateOf(AppDestination.Story)
+    }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Student Reality Lab",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Text(
-            text = "Where is the middle-class income line today after adjusting historical incomes for inflation?",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        IncomeLineChart(
-            records = uiState.records,
-            selectedYear = uiState.selectedYear,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-        )
-
-        if (uiState.records.isNotEmpty()) {
-            val years = uiState.records.map { it.year }
-            val selectedIndex = years.indexOf(uiState.selectedYear).takeIf { it >= 0 } ?: 0
-            var sliderValue by remember(uiState.records) { mutableFloatStateOf(selectedIndex.toFloat()) }
-
-            LaunchedEffect(selectedIndex) {
-                sliderValue = selectedIndex.toFloat()
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Student Reality Lab") },
+                colors = TopAppBarDefaults.topAppBarColors()
+            )
+        },
+        bottomBar = {
+            NavigationBar {
+                destinations.forEach { destination ->
+                    NavigationBarItem(
+                        selected = selectedDestination == destination,
+                        onClick = { setSelectedDestination(destination) },
+                        icon = {
+                            val imageVector = when (destination) {
+                                AppDestination.Story -> Icons.Filled.ShowChart
+                                AppDestination.Insights -> Icons.Filled.Insights
+                                AppDestination.About -> Icons.Filled.Info
+                            }
+                            Icon(imageVector = imageVector, contentDescription = destination.label)
+                        },
+                        label = { Text(text = destination.label) }
+                    )
+                }
             }
-
-            Text(
-                text = "Selected year: ${years[selectedIndex]}",
-                style = MaterialTheme.typography.bodyLarge
+        }
+    ) { contentPadding ->
+        when (selectedDestination) {
+            AppDestination.Story -> StoryScreen(
+                uiState = uiState,
+                onYearSelected = viewModel::onYearSelected,
+                modifier = Modifier.padding(contentPadding)
             )
 
-            Slider(
-                value = sliderValue,
-                onValueChange = { value ->
-                    sliderValue = value
-                    val index = value.roundToInt().coerceIn(0, years.lastIndex)
-                    viewModel.onYearSelected(years[index])
-                },
-                valueRange = 0f..years.lastIndex.toFloat(),
-                steps = (years.size - 2).coerceAtLeast(0),
-                modifier = Modifier.fillMaxWidth()
+            AppDestination.Insights -> InsightsScreen(
+                uiState = uiState,
+                modifier = Modifier.padding(contentPadding)
+            )
+
+            AppDestination.About -> AboutScreen(
+                modifier = Modifier.padding(contentPadding)
             )
         }
-
-        uiState.selectedAdjustedIncome?.let {
-            Text(
-                text = "Inflation-adjusted median income for ${uiState.selectedYear}: ${InflationCalculator.formatCurrency(it)}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-
-        InsightCallout(text = uiState.calloutText)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "What to notice: the nominal line rises over time, but inflation-adjusted values reveal how purchasing power shifts the middle-class income line.",
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 }
